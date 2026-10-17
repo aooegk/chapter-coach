@@ -445,7 +445,6 @@ python scripts/apply_result.py ... --reset
 
 - 删除或替换 `examples/` 下的真实课件、`.ppt-tutor/` 抽取内容与作答照片。
 - 确认 `.gitignore` 已忽略 `*.pptx`、`**/.ppt-tutor/`、`**/media/`。
-- 填写仓库地址（`LICENSE` 与作者已补齐）。
 - 把 3 张截图放到 `docs/`（试卷页、review 页、目录结构），然后在 README 顶部引用。
 
 ## 许可与致谢
@@ -458,7 +457,7 @@ python scripts/apply_result.py ... --reset
 ## 作者与贡献
 
 - 作者：aooegk
-- 仓库：`<repo url>`
+- 仓库：https://github.com/aooegk/ppt-chapter-tutor
 - 问题与建议：欢迎提交 Issue 或 PR。
 
 ---
