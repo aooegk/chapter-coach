@@ -226,31 +226,6 @@ Agent 读取 `submission.json` 与 `media/`，客观题复算、主观题按 rub
 | 错题本 | `.ppt-tutor/wrongbook.md` | 按 KP 分组 |
 | 逐题记录 | `.ppt-tutor/attempts/<quiz_id>.jsonl` | 审计与重批 |
 
-### 6. 上传到 GitHub 时提交什么
-
-提交：
-
-- `SKILL.md`、`README.md`、`LICENSE`
-- `references/`、`schemas/`、`assets/`、`scripts/`
-- `docs/`（截图）
-- 可选的合成示例
-
-不要提交：
-
-- `.ppt-tutor/`
-- `media/`
-- 任何 `*.pptx` / `*.ppt`
-- 真实的作答照片、成绩、错题本
-- 你所在课程的课件内容
-
-发布前跑一次：
-
-```bash
-git status --ignored
-```
-
-确认没有课程资料被暂存。
-
 ## 目录结构
 
 ```text
@@ -427,23 +402,6 @@ python scripts/apply_result.py ... --reset
 
 - `examples/db-ch3/`：数据库课件测试。
 - `examples/math-demo/`：数学证明/计算与图片作答测试。
-
-建议的验收流程：
-
-1. 抽取一份带备注和图片页的 PPT。
-2. 人工核对知识点划分。
-3. 生成一份 8–12 题混合卷。
-4. 用 exam 模式完成一次图片作答。
-5. 检查 `result.json`、`review.html`、`state.json`、`wrongbook.md`。
-6. 重复运行 `apply_result.py`，确认不重复加分。
-
-数据结构校验使用 `schemas/*.json`；可以用 `jsonschema` 校验 `state/knowledge/quiz/plan/submission/result`。
-
-### 发布前检查
-
-- 删除或替换 `examples/` 下的真实课件、`.ppt-tutor/` 抽取内容与作答照片。
-- 确认 `.gitignore` 已忽略 `*.pptx`、`**/.ppt-tutor/`、`**/media/`。
-- 把 3 张截图放到 `docs/`（试卷页、review 页、目录结构），然后在 README 顶部引用。
 
 ## 许可与致谢
 
