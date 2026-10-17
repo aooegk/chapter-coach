@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__TITLE__</title>
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']]
+    },
+    svg: { fontCache: 'global' },
+    options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+  };
+</script>
+<!--__MATHJAX__-->
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #fff; --text: #1f2329; --muted: #6b7280;
+    --line: #e5e7eb; --accent: #2563eb; --ok: #15803d; --ok-bg: #f0fdf4;
+    --bad: #b91c1c; --bad-bg: #fef2f2; --warn: #b45309; --warn-bg: #fffbeb;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px 16px 60px; background: var(--bg); color: var(--text);
+    font: 15px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei",
+          "PingFang SC", "Hiragino Sans GB", sans-serif;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .top { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 16px; }
+  h1 { margin: 0; font-size: 22px; line-height: 1.35; }
+  .meta { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .score-box { flex: none; text-align: right; }
+  .score-num { font-size: 30px; font-weight: 700; color: var(--accent); line-height: 1; }
+  .score-pct { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .summary {
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 14px 18px; margin-bottom: 16px; display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px 20px;
+    font-size: 14px;
+  }
+  .summary b { color: var(--text); }
+  .item {
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 18px 20px; margin-bottom: 14px;
+  }
+  .item.ok { border-left: 4px solid var(--ok); }
+  .item.partial { border-left: 4px solid var(--warn); }
+  .item.bad { border-left: 4px solid var(--bad); }
+  .item-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .badge {
+    background: #eff6ff; color: var(--accent); font-weight: 600;
+    padding: 2px 8px; border-radius: 999px; font-size: 12px;
+  }
+  .qid { color: var(--muted); font-size: 12px; }
+  .kp { color: var(--muted); font-size: 12px; }
+  .pts { margin-left: auto; font-weight: 600; }
+  .pts.ok { color: var(--ok); } .pts.partial { color: var(--warn); } .pts.bad { color: var(--bad); }
+  .stem { white-space: pre-wrap; word-break: break-word; }
+  .math {
+    font-family: "Cambria Math", "STIX Two Math", "Times New Roman", serif;
+    font-size: 1.04em;
+  }
+  .frac { display: inline-block; vertical-align: middle; text-align: center; margin: 0 3px; }
+  .frac .num { display: block; border-bottom: 1px solid currentColor; padding: 0 3px; }
+  .frac .den { display: block; padding: 0 3px; }
+  .sqrt-wrap { white-space: nowrap; }
+  .sqrt { border-top: 1px solid currentColor; padding: 0 2px; }
+  .mtext, .msym, .mcmd { font-style: normal; }
+  .stem sup, .stem sub, .options sup, .options sub { font-size: 0.72em; line-height: 0; }
+  .options { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 6px; }
+  .options li {
+    border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px;
+    display: flex; gap: 10px; align-items: flex-start; background: #fff;
+  }
+  .options li.correct { border-color: #bbf7d0; background: var(--ok-bg); }
+  .options li.selected { box-shadow: inset 3px 0 0 var(--accent); }
+  .options .key { font-weight: 700; color: var(--accent); flex: none; min-width: 1.2em; }
+  .options .tag { margin-left: auto; font-size: 12px; color: var(--muted); flex: none; }
+  .answer-row { margin-top: 12px; font-size: 14px; }
+  .answer-row .label { color: var(--muted); }
+  .answer-row .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre-wrap; word-break: break-word; }
+  .block { margin-top: 12px; padding: 12px 14px; border-radius: 8px; font-size: 14px; }
+  .block.dx { background: var(--bad-bg); border: 1px solid #fecaca; }
+  .block.fix { background: var(--ok-bg); border: 1px solid #bbf7d0; }
+  .block strong { display: block; margin-bottom: 4px; }
+  .rubric { margin: 8px 0 0; padding-left: 20px; font-size: 14px; }
+  .rubric li.hit { color: var(--ok); }
+  .rubric li.miss { color: var(--bad); }
+  .rubric .ev { color: var(--muted); }
+  .note { color: var(--muted); font-size: 13px; margin-top: 10px; }
+  .gallery { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+  .gallery a {
+    display: block; width: 160px; height: 120px; border: 1px solid var(--line);
+    border-radius: 6px; overflow: hidden; background: #fff;
+  }
+  .gallery img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .actions { text-align: center; margin-top: 24px; }
+  button {
+    font: inherit; padding: 9px 18px; border-radius: 8px; border: 1px solid var(--line);
+    background: #fff; cursor: pointer;
+  }
+  @media print {
+    body { background: #fff; padding: 0; }
+    .actions { display: none; }
+    .item { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1 id="title">__TITLE__</h1>
+      <div class="meta" id="meta"></div>
+    </div>
+    <div class="score-box">
+      <div class="score-num" id="score"></div>
+      <div class="score-pct" id="pct"></div>
+    </div>
+  </header>
+  <div class="summary" id="summary"></div>
+  <main id="items"></main>
+  <div class="actions"><button type="button" onclick="window.print()">打印 / 导出 PDF</button></div>
+</div>
+
+<script type="application/json" id="review-data">{"__template__":true}</script>
+<script>
+(function () {
+  'use strict';
+  var DATA = null;
+  try { DATA = JSON.parse(document.getElementById('review-data').textContent); } catch (e) {}
+  if (!DATA || DATA.__template__ || !Array.isArray(DATA.items)) {
+    document.getElementById('items').textContent = '模板未注入批改数据。';
+    return;
+  }
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  var MATH_SYMBOLS = {
+    int: '∫', sum: '∑', prod: '∏', infty: '∞', partial: '∂', nabla: '∇',
+    alpha: 'α', beta: 'β', gamma: 'γ', delta: 'δ', epsilon: 'ε', varepsilon: 'ε',
+    theta: 'θ', lambda: 'λ', mu: 'μ', pi: 'π', rho: 'ρ', sigma: 'σ',
+    tau: 'τ', phi: 'φ', varphi: 'φ', omega: 'ω', Omega: 'Ω',
+    cdot: '·', times: '×', div: '÷', pm: '±', mp: '∓',
+    le: '≤', leq: '≤', ge: '≥', geq: '≥', ne: '≠', neq: '≠',
+    approx: '≈', equiv: '≡', sim: '∼', propto: '∝',
+    to: '→', rightarrow: '→', leftarrow: '←', Rightarrow: '⇒',
+    in: '∈', notin: '∉', subset: '⊂', subseteq: '⊆', cup: '∪', cap: '∩',
+    forall: '∀', exists: '∃', neg: '¬', land: '∧', lor: '∨',
+    ldots: '…', cdots: '⋯'
+  };
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function parseMath(src) {
+    var i = 0;
+
+    function parseGroup() {
+      if (src.charAt(i) !== '{') return '';
+      i++;
+      var out = parseUntil('}');
+      if (src.charAt(i) === '}') i++;
+      return out;
+    }
+
+    function parseUntil(stop) {
+      var out = '';
+      while (i < src.length) {
+        var ch = src.charAt(i);
+        if (stop && ch === stop) break;
+
+        if (ch === '\\') {
+          i++;
+          var m = /^[a-zA-Z]+/.exec(src.slice(i));
+          if (m) {
+            var name = m[0];
+            i += name.length;
+            if (name === 'frac') {
+              var num = parseGroup();
+              var den = parseGroup();
+              out += '<span class="frac"><span class="num">' + num +
+                     '</span><span class="den">' + den + '</span></span>';
+            } else if (name === 'sqrt') {
+              out += '<span class="sqrt-wrap">√<span class="sqrt">' +
+                     parseGroup() + '</span></span>';
+            } else if (name === 'text' || name === 'mathrm' ||
+                       name === 'mathbf' || name === 'mathit') {
+              out += '<span class="mtext">' + parseGroup() + '</span>';
+            } else if (name === 'left' || name === 'right') {
+              // 括号本身由下一个字符输出
+            } else if (name === 'quad' || name === 'qquad') {
+              out += '&nbsp;&nbsp;&nbsp;';
+            } else if (MATH_SYMBOLS[name]) {
+              out += '<span class="msym">' + MATH_SYMBOLS[name] + '</span>';
+            } else {
+              out += '<span class="mcmd">' + escapeHtml(name) + '</span>';
+            }
+            continue;
+          }
+          var punct = src.charAt(i++);
+          if (punct === ',' || punct === ';' || punct === ':' || punct === ' ') {
+            out += '&nbsp;';
+          } else {
+            out += escapeHtml(punct);
+          }
+          continue;
+        }
+
+        if (ch === '^' || ch === '_') {
+          i++;
+          var arg;
+          if (src.charAt(i) === '{') {
+            arg = parseGroup();
+          } else {
+            arg = escapeHtml(src.charAt(i));
+            i++;
+          }
+          out += (ch === '^' ? '<sup>' : '<sub>') + arg +
+                 (ch === '^' ? '</sup>' : '</sub>');
+          continue;
+        }
+
+        if (ch === '{') {
+          i++;
+          out += parseUntil('}');
+          if (src.charAt(i) === '}') i++;
+          continue;
+        }
+
+        if (ch === '}') break;
+        out += escapeHtml(ch);
+        i++;
+      }
+      return out;
+    }
+
+    return parseUntil(null);
+  }
+
+  function textToHtml(s) {
+    return escapeHtml(s).replace(/\n/g, '<br>');
+  }
+
+  function formatRichText(text) {
+    var SENTINEL = '\u0001';
+    var s = String(text == null ? '' : text).replace(/\\\$/g, SENTINEL);
+    var out = '';
+    var i = 0;
+    while (i < s.length) {
+      var start = s.indexOf('$', i);
+      if (start < 0) {
+        out += textToHtml(s.slice(i));
+        break;
+      }
+      out += textToHtml(s.slice(i, start));
+      var double = s.charAt(start + 1) === '$';
+      var delim = double ? '$$' : '$';
+      var end = s.indexOf(delim, start + delim.length);
+      if (end < 0) {
+        out += textToHtml(s.slice(start));
+        break;
+      }
+      out += '<span class="math">' +
+             parseMath(s.slice(start + delim.length, end)) + '</span>';
+      i = end + delim.length;
+    }
+    return out.replace(new RegExp(SENTINEL, 'g'), '$$');
+  }
+
+  function hasMathJax() {
+    return !!(window.MathJax && typeof window.MathJax.typesetPromise === 'function');
+  }
+
+  function renderRich(node, text) {
+    if (hasMathJax()) {
+      node.innerHTML = textToHtml(text);
+    } else {
+      node.innerHTML = formatRichText(text);
+    }
+    return node;
+  }
+
+  function typeset(target) {
+    if (!hasMathJax() || !target) return;
+    var run = function () {
+      window.MathJax.typesetPromise([target]).then(function () {
+        var errors = target.querySelectorAll ? target.querySelectorAll('mjx-merror') : [];
+        if (errors.length && window.console) {
+          console.warn('MathJax render errors:', errors.length);
+        }
+      }).catch(function () {});
+    };
+    if (window.MathJax.startup && window.MathJax.startup.promise) {
+      window.MathJax.startup.promise.then(run).catch(function () {});
+    } else {
+      run();
+    }
+  }
+
+  function statusOf(item) {
+    if (Number(item.awarded) >= Number(item.max_score) - 1e-9) return 'ok';
+    if (Number(item.awarded) > 0) return 'partial';
+    return 'bad';
+  }
+
+  function includesKey(list, key) {
+    return (list || []).indexOf(String(key).toLowerCase()) >= 0;
+  }
+
+  document.title = DATA.title + ' · 批改报告';
+  document.getElementById('title').textContent = DATA.title;
+  document.getElementById('meta').textContent =
+    DATA.quiz_id + ' · ' + (DATA.mode === 'exam' ? '考试模式' : '练习模式') +
+    (DATA.graded_at ? ' · 批改于 ' + DATA.graded_at : '');
+
+  var total = Number(DATA.score.max) || 0;
+  var awarded = Number(DATA.score.awarded) || 0;
+  document.getElementById('score').textContent = awarded + ' / ' + total;
+  document.getElementById('pct').textContent = total ? (awarded / total * 100).toFixed(1) + '%' : '';
+
+  var s = DATA.summary || {};
+  var summary = document.getElementById('summary');
+  [
+    ['客观题', (s.objective_awarded || 0) + ' / ' + (s.objective_max || 0)],
+    ['主观题', (s.subjective_awarded || 0) + ' / ' + (s.subjective_max || 0)],
+    ['知识类错误', (s.knowledge_errors || 0) + ' 题'],
+    ['过程/语法错误', (s.procedure_errors || 0) + ' 题'],
+    ['表达/笔误', (s.other_errors || 0) + ' 题']
+  ].forEach(function (pair) {
+    var box = el('div');
+    box.appendChild(el('span', null, pair[0] + '：'));
+    box.appendChild(el('b', null, pair[1]));
+    summary.appendChild(box);
+  });
+
+  var host = document.getElementById('items');
+
+  DATA.items.forEach(function (item) {
+    var st = statusOf(item);
+    var card = el('section', 'item ' + st);
+
+    var head = el('div', 'item-head');
+    head.appendChild(el('span', 'badge', item.type_label || item.type));
+    head.appendChild(el('span', 'qid', item.qid));
+    if (item.kp_titles && item.kp_titles.length) {
+      head.appendChild(el('span', 'kp', item.kp_titles.join('、')));
+    }
+    head.appendChild(el('span', 'pts ' + st, item.awarded + ' / ' + item.max_score));
+    card.appendChild(head);
+
+    var stem = el('div', 'stem');
+    renderRich(stem, item.stem || '');
+    card.appendChild(stem);
+
+    if (item.options && item.options.length) {
+      var ul = el('ul', 'options');
+      item.options.forEach(function (opt) {
+        var key = String(opt.key);
+        var li = el('li');
+        if (includesKey(item.reference_keys, key)) li.classList.add('correct');
+        if (includesKey(item.response_keys, key)) li.classList.add('selected');
+        li.appendChild(el('span', 'key', key));
+        var optText = el('span', 'text');
+        renderRich(optText, opt.text);
+        li.appendChild(optText);
+        var tag = [];
+        if (includesKey(item.response_keys, key)) tag.push('你的选择');
+        if (includesKey(item.reference_keys, key)) tag.push('正确答案');
+        if (tag.length) li.appendChild(el('span', 'tag', tag.join(' / ')));
+        ul.appendChild(li);
+      });
+      card.appendChild(ul);
+    }
+
+    var your = el('div', 'answer-row');
+    your.appendChild(el('span', 'label', '你的答案：'));
+    var yourVal = el('span', 'mono');
+    renderRich(yourVal, item.response_text || '（未作答）');
+    your.appendChild(yourVal);
+    card.appendChild(your);
+
+    var ref = el('div', 'answer-row');
+    ref.appendChild(el('span', 'label', '参考答案：'));
+    var refVal = el('span', 'mono');
+    renderRich(refVal, item.reference_text || '见评分要点');
+    ref.appendChild(refVal);
+    card.appendChild(ref);
+
+    if (item.executed === false) {
+      card.appendChild(el('div', 'note', 'SQL 未能成功执行，本题按 rubric 判分。'));
+    }
+
+    if (item.attachments && item.attachments.length) {
+      var media = el('div', 'answer-row');
+      media.appendChild(el('span', 'label', '作答图片：'));
+      var gallery = el('div', 'gallery');
+      item.attachments.forEach(function (path) {
+        var link = document.createElement('a');
+        link.href = path;
+        link.target = '_blank';
+        var img = document.createElement('img');
+        img.src = path;
+        img.alt = '作答图片';
+        link.appendChild(img);
+        gallery.appendChild(link);
+      });
+      media.appendChild(gallery);
+      card.appendChild(media);
+    }
+
+    if (item.transcript) {
+      var tr = el('div', 'block');
+      tr.appendChild(el('strong', null, '图片识别结果'));
+      var trBody = el('div', 'mono');
+      renderRich(trBody, item.transcript);
+      tr.appendChild(trBody);
+      card.appendChild(tr);
+    }
+
+    if (item.rubric && item.rubric.length) {
+      card.appendChild(el('div', 'answer-row', '评分要点：'));
+      var rul = el('ul', 'rubric');
+      item.rubric.forEach(function (point) {
+        var li = el('li', point.hit ? 'hit' : 'miss');
+        var pointText = el('span');
+        renderRich(pointText, (point.hit ? '✓ ' : '✗ ') + point.point + '（' + point.weight + ' 分）');
+        li.appendChild(pointText);
+        if (point.evidence) {
+          var ev = el('span', 'ev');
+          renderRich(ev, ' — ' + point.evidence);
+          li.appendChild(ev);
+        }
+        rul.appendChild(li);
+      });
+      card.appendChild(rul);
+    }
+
+    if (item.diagnosis) {
+      var dx = el('div', 'block dx');
+      dx.appendChild(el('strong', null, '错在哪里'));
+      var dxBody = el('div');
+      renderRich(dxBody, item.diagnosis);
+      dx.appendChild(dxBody);
+      card.appendChild(dx);
+    }
+    if (item.fix) {
+      var fx = el('div', 'block fix');
+      fx.appendChild(el('strong', null, '怎么改'));
+      var fxBody = el('div');
+      renderRich(fxBody, item.fix);
+      fx.appendChild(fxBody);
+      card.appendChild(fx);
+    }
+    if (item.feedback) {
+      var fb = el('div', 'note');
+      renderRich(fb, '反馈：' + item.feedback);
+      card.appendChild(fb);
+    }
+    if (item.review_slides && item.review_slides.length) {
+      card.appendChild(el('div', 'note', '回看：PPT 第 ' + item.review_slides.join('、') + ' 页'));
+    }
+
+    host.appendChild(card);
+  });
+
+  typeset(host);
+})();
+</script>
+</body>
+</html>

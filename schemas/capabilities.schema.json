@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppt-chapter-tutor/schemas/capabilities.schema.json",
+  "title": "Capabilities",
+  "description": "会话启动时的环境探测结果，后续分支只读此文件。",
+  "type": "object",
+  "required": ["schema_version", "os", "python", "browser_automation", "tier", "probed_at"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "os": { "enum": ["win32", "darwin", "linux", "other"] },
+    "python": {
+      "type": "object",
+      "required": ["available"],
+      "additionalProperties": false,
+      "properties": {
+        "available": { "type": "boolean" },
+        "version": { "type": "string" },
+        "packages": {
+          "type": "object",
+          "additionalProperties": { "type": "boolean" }
+        }
+      }
+    },
+    "browser_automation": {
+      "type": "object",
+      "required": ["available"],
+      "additionalProperties": false,
+      "properties": {
+        "available": { "type": "boolean" },
+        "tool": { "type": "string" }
+      }
+    },
+    "download_dir": {
+      "type": ["string", "null"],
+      "description": "探测到的浏览器下载目录；未知时为 null。"
+    },
+    "clipboard": {
+      "type": "object",
+      "required": ["available"],
+      "additionalProperties": false,
+      "properties": {
+        "available": { "type": "boolean" },
+        "command": { "type": "string" }
+      }
+    },
+    "tier": { "enum": ["A", "B", "C"] },
+    "model_vision": {
+      "enum": ["true", "false", "unknown"],
+      "description": "当前模型能否直接读取图片。unknown 时不要假设。"
+    },
+    "probed_at": { "type": "string", "format": "date-time" },
+    "notes": { "type": "string" }
+  }
+}

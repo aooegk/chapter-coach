@@ -1,0 +1,1116 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__TITLE__</title>
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']]
+    },
+    svg: { fontCache: 'global' },
+    options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+  };
+</script>
+<!--__MATHJAX__-->
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --card: #ffffff;
+    --text: #1f2329;
+    --muted: #6b7280;
+    --line: #e5e7eb;
+    --accent: #2563eb;
+    --accent-soft: #eff6ff;
+    --ok: #15803d;
+    --ok-soft: #f0fdf4;
+    --bad: #b91c1c;
+    --bad-soft: #fef2f2;
+    --warn: #b45309;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font: 15px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei",
+          "PingFang SC", "Hiragino Sans GB", sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    padding: 0 16px 120px;
+  }
+  .top {
+    max-width: 880px; margin: 0 auto; padding: 24px 4px 12px;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+  }
+  .top h1 { margin: 0; font-size: 22px; line-height: 1.35; }
+  .meta { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .timer {
+    flex: none; font-variant-numeric: tabular-nums; font-size: 18px;
+    padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px;
+    background: var(--card); color: var(--muted);
+  }
+  .timer.over { color: var(--bad); border-color: #fecaca; background: var(--bad-soft); }
+  .banner {
+    max-width: 880px; margin: 0 auto 16px; padding: 10px 14px;
+    border-radius: var(--radius); background: var(--accent-soft);
+    border: 1px solid #bfdbfe; color: #1e40af; font-size: 14px;
+  }
+  .banner.warn { background: #fffbeb; border-color: #fde68a; color: var(--warn); }
+  main { max-width: 880px; margin: 0 auto; }
+  .q {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 18px 20px; margin-bottom: 14px;
+  }
+  .q.correct { border-color: #bbf7d0; background: var(--ok-soft); }
+  .q.incorrect { border-color: #fecaca; background: var(--bad-soft); }
+  .q-head {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    margin-bottom: 10px; color: var(--muted); font-size: 12px;
+  }
+  .badge {
+    background: var(--accent-soft); color: var(--accent); font-weight: 600;
+    padding: 2px 8px; border-radius: 999px;
+  }
+  .q-head .score { margin-left: auto; }
+  .stem { white-space: pre-wrap; word-break: break-word; font-size: 15px; }
+  .math {
+    font-family: "Cambria Math", "STIX Two Math", "Times New Roman", serif;
+    font-size: 1.04em;
+  }
+  .frac { display: inline-block; vertical-align: middle; text-align: center; margin: 0 3px; }
+  .frac .num { display: block; border-bottom: 1px solid currentColor; padding: 0 3px; }
+  .frac .den { display: block; padding: 0 3px; }
+  .sqrt-wrap { white-space: nowrap; }
+  .sqrt { border-top: 1px solid currentColor; padding: 0 2px; }
+  .mtext, .msym, .mcmd { font-style: normal; }
+  .stem sup, .stem sub, .opt-text sup, .opt-text sub { font-size: 0.72em; line-height: 0; }
+  .options { margin-top: 12px; display: grid; gap: 8px; }
+  .option {
+    display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px;
+    border: 1px solid var(--line); border-radius: 8px; cursor: pointer;
+    background: #fff; transition: border-color .12s, background .12s;
+  }
+  .option:hover { border-color: #c7d2fe; background: #fafaff; }
+  .option input { margin-top: 4px; flex: none; }
+  .opt-key { flex: none; font-weight: 700; color: var(--accent); min-width: 1.2em; }
+  .opt-text { white-space: pre-wrap; word-break: break-word; }
+  textarea.answer, input.blank {
+    width: 100%; margin-top: 12px; padding: 10px 12px;
+    border: 1px solid var(--line); border-radius: 8px; font: inherit;
+    background: #fff; color: var(--text); resize: vertical;
+  }
+  textarea.answer:focus, input.blank:focus {
+    outline: 2px solid #bfdbfe; border-color: var(--accent);
+  }
+  .mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Cascadia Mono", monospace;
+    font-size: 13px;
+  }
+  .blank-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+  .blank-row .idx { color: var(--muted); font-size: 13px; flex: none; min-width: 3em; }
+  .blank-row input { margin-top: 0; }
+  .sql-ctx { margin-top: 12px; font-size: 13px; }
+  .sql-ctx summary { cursor: pointer; color: var(--accent); }
+  .sql-ctx pre {
+    white-space: pre-wrap; word-break: break-word; background: #0f172a; color: #e2e8f0;
+    padding: 12px 14px; border-radius: 8px; overflow: auto; margin: 10px 0 0;
+  }
+  .feedback { margin-top: 14px; padding: 12px 14px; border-radius: 8px; background: #fff; border: 1px dashed var(--line); font-size: 14px; }
+  .feedback h4 { margin: 0 0 6px; font-size: 13px; color: var(--muted); font-weight: 600; }
+  .feedback .verdict { font-weight: 700; margin-bottom: 6px; }
+  .feedback .verdict.ok { color: var(--ok); }
+  .feedback .verdict.bad { color: var(--bad); }
+  .feedback .verdict.manual { color: var(--muted); }
+  .feedback ul { margin: 6px 0 0; padding-left: 20px; }
+  .upload { margin-top: 14px; padding: 12px; border: 1px dashed #c7d2fe; border-radius: 8px; background: #fafaff; }
+  .upload-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .upload-btn {
+    display: inline-block; padding: 8px 14px; border: 1px solid var(--accent);
+    border-radius: 8px; color: var(--accent); background: #fff; cursor: pointer; font-size: 14px;
+  }
+  .upload-btn input { display: none; }
+  .upload-hint { color: var(--muted); font-size: 12px; }
+  .thumbs { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+  .thumb {
+    position: relative; width: 120px; height: 90px; border: 1px solid var(--line);
+    border-radius: 6px; overflow: hidden; background: #fff;
+  }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .thumb button {
+    position: absolute; top: 2px; right: 2px; width: 22px; height: 22px; padding: 0;
+    line-height: 20px; border-radius: 50%; background: rgba(0,0,0,.6); color: #fff;
+    border: 0; cursor: pointer;
+  }
+  .bar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+    background: rgba(255,255,255,.96); backdrop-filter: blur(8px);
+    border-top: 1px solid var(--line); padding: 12px 16px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .bar-inner { max-width: 880px; margin: 0 auto; width: 100%; display: flex; align-items: center; gap: 16px; }
+  .progress { flex: 1; min-width: 120px; }
+  .progress-text { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  .bar-track { height: 6px; background: var(--line); border-radius: 999px; overflow: hidden; }
+  #progress-fill { height: 100%; width: 0; background: var(--accent); transition: width .2s; }
+  button {
+    font: inherit; border-radius: 8px; border: 1px solid var(--line);
+    background: #fff; color: var(--text); padding: 9px 16px; cursor: pointer;
+  }
+  button:hover { border-color: #c7d2fe; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  button.primary:hover { background: #1d4ed8; }
+  button:disabled { opacity: .55; cursor: not-allowed; }
+  .status { max-width: 880px; margin: 18px auto 0; color: var(--muted); font-size: 13px; white-space: pre-wrap; }
+  .result {
+    max-width: 880px; margin: 18px auto 0; padding: 18px 20px;
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  }
+  .result h2 { margin: 0 0 8px; font-size: 18px; }
+  .result p { margin: 6px 0; }
+  .result .hint { color: var(--muted); font-size: 13px; }
+  .result .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+  @media (max-width: 600px) {
+    .top { flex-direction: column; }
+    .timer { align-self: flex-start; }
+    .q { padding: 14px; }
+  }
+  @media print {
+    .bar, .timer { display: none; }
+    body { background: #fff; padding-bottom: 20px; }
+    .q { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div>
+    <h1 id="quiz-title">__TITLE__</h1>
+    <div class="meta">
+      <span id="quiz-id"></span>
+      <span id="mode-label"></span>
+    </div>
+  </div>
+  <div class="timer" id="timer" aria-label="答题用时">00:00</div>
+</header>
+
+<div id="banner" class="banner" hidden></div>
+
+<main id="questions"></main>
+
+<div class="bar">
+  <div class="bar-inner">
+    <div class="progress">
+      <div class="progress-text"><span id="progress-text">0 / 0</span></div>
+      <div class="bar-track"><div id="progress-fill"></div></div>
+    </div>
+    <button id="btn-submit" class="primary" type="button">提交</button>
+  </div>
+</div>
+
+<div id="status" class="status" aria-live="polite"></div>
+<section id="result" class="result" hidden></section>
+
+<script type="application/json" id="quiz-data">{"__template__":true}</script>
+<script type="application/json" id="submit-config">{"__template__":true}</script>
+<script>
+(function () {
+  'use strict';
+
+  function readJSON(id) {
+    var node = document.getElementById(id);
+    if (!node) return null;
+    try { return JSON.parse(node.textContent); } catch (e) { return null; }
+  }
+
+  var QUIZ = readJSON('quiz-data');
+  var CFG = readJSON('submit-config') || {};
+  var banner = document.getElementById('banner');
+  var statusEl = document.getElementById('status');
+  var resultEl = document.getElementById('result');
+
+  if (!QUIZ || QUIZ.__template__ || !Array.isArray(QUIZ.questions)) {
+    banner.hidden = false;
+    banner.className = 'banner warn';
+    banner.textContent = '模板未注入试卷数据。请让 Agent 运行 build_exam.py 生成试卷后再打开。';
+    document.getElementById('btn-submit').disabled = true;
+    return;
+  }
+
+  var TYPE_LABELS = {
+    single_choice: '单选',
+    multi_select: '多选',
+    true_false: '判断',
+    fill_blank: '填空',
+    short_answer: '简答',
+    design: '设计',
+    sql: 'SQL',
+    code: '代码',
+    proof: '证明',
+    calculation: '计算',
+    solution: '解答',
+    programming: '编程',
+    drawing: '作图',
+    translation: '翻译',
+    essay: '论述',
+    case_analysis: '案例分析'
+  };
+
+  var state = {
+    answers: {},
+    changed: {},
+    attachments: {},
+    startedAt: new Date().toISOString(),
+    submitted: false
+  };
+
+  var thumbHosts = {};
+
+  var LS_KEY = 'pptTutorDraft:' + QUIZ.quiz_id;
+  var saveTimer = null;
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  function typeLabel(type) {
+    if (TYPE_LABELS[type]) return TYPE_LABELS[type];
+    if (type && type.indexOf('custom:') === 0) return type.slice(7);
+    return type || '题目';
+  }
+
+  function arr(v) {
+    if (v == null) return [];
+    return Array.isArray(v) ? v : [v];
+  }
+
+  function normalize(v) {
+    return String(v == null ? '' : v).trim().toLowerCase().replace(/\s+/g, ' ');
+  }
+
+  function normBool(v) {
+    if (v === true) return 'true';
+    if (v === false) return 'false';
+    var s = normalize(v);
+    if (['对', '正确', 'true', 't', '是', '√'].indexOf(s) >= 0) return 'true';
+    if (['错', '错误', 'false', 'f', '否', '×', 'x'].indexOf(s) >= 0) return 'false';
+    return s;
+  }
+
+  function persist() {
+    try {
+      localStorage.setItem(LS_KEY, JSON.stringify({
+        answers: state.answers,
+        changed: state.changed,
+        startedAt: state.startedAt,
+        submitted: state.submitted
+      }));
+    } catch (e) { /* file:// 下可能不可用，忽略 */ }
+  }
+
+  function schedulePersist() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(persist, 300);
+  }
+
+  function restoreDraft() {
+    var raw = null;
+    try { raw = localStorage.getItem(LS_KEY); } catch (e) { return false; }
+    if (!raw) return false;
+    try {
+      var d = JSON.parse(raw);
+      if (!d || typeof d !== 'object') return false;
+      state.answers = d.answers || {};
+      state.changed = d.changed || {};
+      if (d.startedAt) state.startedAt = d.startedAt;
+      if (d.submitted) state.submitted = true;
+      return true;
+    } catch (e) { return false; }
+  }
+
+  function isAnswered(q) {
+    if ((state.attachments[q.id] || []).length > 0) return true;
+    var v = state.answers[q.id];
+    if (q.type === 'multi_select') return arr(v).length > 0;
+    if (q.type === 'fill_blank') {
+      if (Array.isArray(v)) return v.some(function (x) { return normalize(x) !== ''; });
+      return normalize(v) !== '';
+    }
+    return normalize(v) !== '';
+  }
+
+  function updateProgress() {
+    var total = QUIZ.questions.length;
+    var done = QUIZ.questions.filter(isAnswered).length;
+    document.getElementById('progress-text').textContent = done + ' / ' + total;
+    document.getElementById('progress-fill').style.width = total ? (done / total * 100) + '%' : '0%';
+  }
+
+  function optionValues(q) {
+    if (q.options && q.options.length) return q.options;
+    if (q.type === 'true_false') {
+      return [{ key: 'true', text: '正确' }, { key: 'false', text: '错误' }];
+    }
+    return [];
+  }
+
+  function markChanged(qid) {
+    state.changed[qid] = (state.changed[qid] || 0) + 1;
+  }
+
+  function renderOptions(q) {
+    var wrap = el('div', 'options');
+    var multi = q.type === 'multi_select';
+    optionValues(q).forEach(function (opt) {
+      var label = el('label', 'option');
+      var input = document.createElement('input');
+      input.type = multi ? 'checkbox' : 'radio';
+      input.name = q.id;
+      input.value = opt.key;
+      var current = state.answers[q.id];
+      if (multi) input.checked = arr(current).indexOf(opt.key) >= 0;
+      else input.checked = current === opt.key;
+      input.addEventListener('change', function () {
+        if (multi) {
+          var picked = [];
+          wrap.querySelectorAll('input:checked').forEach(function (n) { picked.push(n.value); });
+          state.answers[q.id] = picked;
+        } else {
+          state.answers[q.id] = opt.key;
+        }
+        markChanged(q.id);
+        updateProgress();
+        schedulePersist();
+      });
+      label.appendChild(input);
+      label.appendChild(el('span', 'opt-key', opt.key));
+      var optText = el('span', 'opt-text');
+      optText.innerHTML = '';
+      renderRich(optText, opt.text);
+      label.appendChild(optText);
+      wrap.appendChild(label);
+    });
+    return wrap;
+  }
+
+  function renderBlanks(q) {
+    var wrap = el('div', 'blanks');
+    var count = q.blanks || 1;
+    var current = state.answers[q.id];
+    var values = Array.isArray(current) ? current : (current ? [current] : []);
+    for (var i = 0; i < count; i++) {
+      var row = el('div', 'blank-row');
+      if (count > 1) row.appendChild(el('span', 'idx', '第 ' + (i + 1) + ' 空'));
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'blank';
+      input.value = values[i] || '';
+      input.setAttribute('aria-label', q.id + ' 第 ' + (i + 1) + ' 空');
+      (function (index, node) {
+        node.addEventListener('input', function () {
+          var out = [];
+          wrap.querySelectorAll('input.blank').forEach(function (n) { out.push(n.value); });
+          state.answers[q.id] = count === 1 ? (out[0] || '') : out;
+          markChanged(q.id);
+          updateProgress();
+          schedulePersist();
+        });
+      })(i, input);
+      row.appendChild(input);
+      wrap.appendChild(row);
+    }
+    return wrap;
+  }
+
+  function renderTextarea(q) {
+    var ta = document.createElement('textarea');
+    var isCode = q.type === 'sql' || q.type === 'code' || q.type === 'programming';
+    ta.className = 'answer' + (isCode ? ' mono' : '');
+    ta.rows = isCode ? 8 : 5;
+    ta.value = typeof state.answers[q.id] === 'string' ? state.answers[q.id] : '';
+    ta.placeholder = q.type === 'sql' ? '在此写 SQL，可只写查询语句'
+      : (isCode ? '在此写代码' : '在此作答');
+    ta.setAttribute('aria-label', q.id + ' 作答');
+    ta.addEventListener('input', function () {
+      state.answers[q.id] = ta.value;
+      markChanged(q.id);
+      updateProgress();
+      schedulePersist();
+    });
+    return ta;
+  }
+
+  function allowsImage(q) {
+    if (typeof q.allow_image === 'boolean') return q.allow_image;
+    return ['proof', 'calculation', 'solution', 'drawing', 'design',
+            'short_answer', 'essay', 'translation', 'case_analysis'].indexOf(q.type) >= 0;
+  }
+
+  function maxAttachments(q) {
+    return Math.max(1, Math.min(5, q.max_attachments || 3));
+  }
+
+  function compressImage(file) {
+    return new Promise(function (resolve, reject) {
+      if (!file || !/^image\//.test(file.type || '')) {
+        reject(new Error('不是图片文件'));
+        return;
+      }
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        try {
+          var maxDim = 2000;
+          var scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+          var w = Math.max(1, Math.round(img.width * scale));
+          var h = Math.max(1, Math.round(img.height * scale));
+          var canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          var ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, w, h);
+          ctx.drawImage(img, 0, 0, w, h);
+          var dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          URL.revokeObjectURL(url);
+          resolve({
+            name: file.name || ('image-' + Date.now() + '.jpg'),
+            media_type: 'image/jpeg',
+            data_url: dataUrl,
+            width: w,
+            height: h,
+            size: Math.round(dataUrl.length * 0.75)
+          });
+        } catch (e) {
+          URL.revokeObjectURL(url);
+          reject(e);
+        }
+      };
+      img.onerror = function () {
+        URL.revokeObjectURL(url);
+        reject(new Error('浏览器无法解码该图片，请改用 JPG/PNG'));
+      };
+      img.src = url;
+    });
+  }
+
+  function renderThumbs(qid) {
+    var host = thumbHosts[qid];
+    if (!host) return;
+    host.innerHTML = '';
+    (state.attachments[qid] || []).forEach(function (att, index) {
+      var box = el('div', 'thumb');
+      var img = document.createElement('img');
+      img.src = att.data_url;
+      img.alt = '作答图片 ' + (index + 1);
+      var btn = el('button', null, '×');
+      btn.type = 'button';
+      btn.title = '移除这张图片';
+      btn.addEventListener('click', function () {
+        state.attachments[qid].splice(index, 1);
+        markChanged(qid);
+        updateProgress();
+        renderThumbs(qid);
+      });
+      box.appendChild(img);
+      box.appendChild(btn);
+      host.appendChild(box);
+    });
+  }
+
+  function handleFiles(q, files) {
+    if (!files || !files.length) return;
+    var current = state.attachments[q.id] || [];
+    var room = maxAttachments(q) - current.length;
+    if (room <= 0) {
+      alert('最多上传 ' + maxAttachments(q) + ' 张图片');
+      return;
+    }
+    var picked = Array.prototype.slice.call(files, 0, room);
+    Promise.all(picked.map(function (file) {
+      return compressImage(file).catch(function () { return null; });
+    })).then(function (images) {
+      var ok = images.filter(Boolean);
+      if (ok.length < images.length) {
+        alert('部分图片读取失败，已跳过。请改用 JPG/PNG 格式。');
+      }
+      state.attachments[q.id] = (state.attachments[q.id] || []).concat(ok);
+      markChanged(q.id);
+      updateProgress();
+      renderThumbs(q.id);
+    });
+  }
+
+  function renderUpload(q) {
+    var wrap = el('div', 'upload');
+    var top = el('div', 'upload-top');
+    var label = el('label', 'upload-btn', '上传图片 / 拍照');
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.multiple = true;
+    input.addEventListener('change', function () {
+      handleFiles(q, input.files);
+      input.value = '';
+    });
+    label.appendChild(input);
+    top.appendChild(label);
+    top.appendChild(el('span', 'upload-hint',
+      '最多 ' + maxAttachments(q) + ' 张；图片仅保存在当前页面，提交前请勿关闭'));
+    wrap.appendChild(top);
+    var thumbs = el('div', 'thumbs');
+    thumbHosts[q.id] = thumbs;
+    wrap.appendChild(thumbs);
+    renderThumbs(q.id);
+    return wrap;
+  }
+
+  function renderSqlContext(q) {
+    if (!q.sql_context) return null;
+    var details = el('details', 'sql-ctx');
+    details.appendChild(el('summary', null, '查看表结构与样例数据'));
+    var text = 'DDL:\n' + (q.sql_context.ddl || '');
+    if (q.sql_context.rows) text += '\n\n数据:\n' + q.sql_context.rows;
+    var pre = el('pre', 'mono', text);
+    details.appendChild(pre);
+    return details;
+  }
+
+  var MATH_SYMBOLS = {
+    int: '∫', sum: '∑', prod: '∏', infty: '∞', partial: '∂', nabla: '∇',
+    alpha: 'α', beta: 'β', gamma: 'γ', delta: 'δ', epsilon: 'ε', varepsilon: 'ε',
+    theta: 'θ', lambda: 'λ', mu: 'μ', pi: 'π', rho: 'ρ', sigma: 'σ',
+    tau: 'τ', phi: 'φ', varphi: 'φ', omega: 'ω', Omega: 'Ω',
+    cdot: '·', times: '×', div: '÷', pm: '±', mp: '∓',
+    le: '≤', leq: '≤', ge: '≥', geq: '≥', ne: '≠', neq: '≠',
+    approx: '≈', equiv: '≡', sim: '∼', propto: '∝',
+    to: '→', rightarrow: '→', leftarrow: '←', Rightarrow: '⇒',
+    in: '∈', notin: '∉', subset: '⊂', subseteq: '⊆', cup: '∪', cap: '∩',
+    forall: '∀', exists: '∃', neg: '¬', land: '∧', lor: '∨',
+    ldots: '…', cdots: '⋯'
+  };
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  // 轻量 LaTeX 子集渲染：上下标、\int、\frac、\sqrt、希腊字母与常用符号。
+  function parseMath(src) {
+    var i = 0;
+
+    function parseGroup() {
+      if (src.charAt(i) !== '{') return '';
+      i++;
+      var out = parseUntil('}');
+      if (src.charAt(i) === '}') i++;
+      return out;
+    }
+
+    function parseUntil(stop) {
+      var out = '';
+      while (i < src.length) {
+        var ch = src.charAt(i);
+        if (stop && ch === stop) break;
+
+        if (ch === '\\') {
+          i++;
+          var m = /^[a-zA-Z]+/.exec(src.slice(i));
+          if (m) {
+            var name = m[0];
+            i += name.length;
+            if (name === 'frac') {
+              var num = parseGroup();
+              var den = parseGroup();
+              out += '<span class="frac"><span class="num">' + num +
+                     '</span><span class="den">' + den + '</span></span>';
+            } else if (name === 'sqrt') {
+              out += '<span class="sqrt-wrap">√<span class="sqrt">' +
+                     parseGroup() + '</span></span>';
+            } else if (name === 'text' || name === 'mathrm' ||
+                       name === 'mathbf' || name === 'mathit') {
+              out += '<span class="mtext">' + parseGroup() + '</span>';
+            } else if (name === 'left' || name === 'right') {
+              // 括号本身由下一个字符输出
+            } else if (name === 'quad' || name === 'qquad') {
+              out += '&nbsp;&nbsp;&nbsp;';
+            } else if (MATH_SYMBOLS[name]) {
+              out += '<span class="msym">' + MATH_SYMBOLS[name] + '</span>';
+            } else {
+              out += '<span class="mcmd">' + escapeHtml(name) + '</span>';
+            }
+            continue;
+          }
+          var punct = src.charAt(i++);
+          if (punct === ',' || punct === ';' || punct === ':' || punct === ' ') {
+            out += '&nbsp;';
+          } else {
+            out += escapeHtml(punct);
+          }
+          continue;
+        }
+
+        if (ch === '^' || ch === '_') {
+          i++;
+          var arg;
+          if (src.charAt(i) === '{') {
+            arg = parseGroup();
+          } else {
+            arg = escapeHtml(src.charAt(i));
+            i++;
+          }
+          out += (ch === '^' ? '<sup>' : '<sub>') + arg +
+                 (ch === '^' ? '</sup>' : '</sub>');
+          continue;
+        }
+
+        if (ch === '{') {
+          i++;
+          out += parseUntil('}');
+          if (src.charAt(i) === '}') i++;
+          continue;
+        }
+
+        if (ch === '}') break;
+        out += escapeHtml(ch);
+        i++;
+      }
+      return out;
+    }
+
+    return parseUntil(null);
+  }
+
+  function textToHtml(s) {
+    return escapeHtml(s).replace(/\n/g, '<br>');
+  }
+
+  function formatRichText(text) {
+    var SENTINEL = '\u0001';
+    var s = String(text == null ? '' : text).replace(/\\\$/g, SENTINEL);
+    var out = '';
+    var i = 0;
+    while (i < s.length) {
+      var start = s.indexOf('$', i);
+      if (start < 0) {
+        out += textToHtml(s.slice(i));
+        break;
+      }
+      out += textToHtml(s.slice(i, start));
+      var double = s.charAt(start + 1) === '$';
+      var delim = double ? '$$' : '$';
+      var end = s.indexOf(delim, start + delim.length);
+      if (end < 0) {
+        out += textToHtml(s.slice(start));
+        break;
+      }
+      out += '<span class="math">' +
+             parseMath(s.slice(start + delim.length, end)) + '</span>';
+      i = end + delim.length;
+    }
+    return out.replace(new RegExp(SENTINEL, 'g'), '$$');
+  }
+
+  function hasMathJax() {
+    return !!(window.MathJax && typeof window.MathJax.typesetPromise === 'function');
+  }
+
+  function renderRich(node, text) {
+    if (hasMathJax()) {
+      // 交给 MathJax 按完整 LaTeX 规则排版；这里只做 HTML 转义与换行。
+      node.innerHTML = textToHtml(text);
+    } else {
+      node.innerHTML = formatRichText(text);
+    }
+    return node;
+  }
+
+  function typeset(target) {
+    if (!hasMathJax() || !target) return;
+    var run = function () {
+      window.MathJax.typesetPromise([target]).then(function () {
+        var errors = target.querySelectorAll ? target.querySelectorAll('mjx-merror') : [];
+        if (errors.length) {
+          var banner = document.getElementById('banner');
+          if (banner) {
+            banner.hidden = false;
+            banner.className = 'banner warn';
+            banner.textContent = '有 ' + errors.length + ' 处公式未能按 LaTeX 正确渲染，请检查写法。';
+          }
+          if (window.console) console.warn('MathJax render errors:', errors.length);
+        }
+      }).catch(function () {});
+    };
+    if (window.MathJax.startup && window.MathJax.startup.promise) {
+      window.MathJax.startup.promise.then(run).catch(function () {});
+    } else {
+      run();
+    }
+  }
+
+  function renderQuestion(q) {
+    var card = el('section', 'q');
+    card.id = 'q-' + q.id;
+    card.setAttribute('data-qid', q.id);
+
+    var head = el('div', 'q-head');
+    head.appendChild(el('span', 'badge', q.type_label || typeLabel(q.type)));
+    head.appendChild(el('span', null, q.id));
+    if (q.kp_ids && q.kp_ids.length) {
+      head.appendChild(el('span', null, q.kp_ids.join(' / ')));
+    }
+    if (q.source_slides && q.source_slides.length) {
+      head.appendChild(el('span', null, 'PPT 第 ' + q.source_slides.join('、') + ' 页'));
+    }
+    head.appendChild(el('span', 'score', (q.max_score != null ? q.max_score : '') + ' 分'));
+    card.appendChild(head);
+
+    renderRich(card.appendChild(el('div', 'stem')), q.stem);
+
+    if (q.type === 'single_choice' || q.type === 'multi_select' || q.type === 'true_false') {
+      card.appendChild(renderOptions(q));
+    } else if (q.type === 'fill_blank') {
+      card.appendChild(renderBlanks(q));
+    } else {
+      var ctx = renderSqlContext(q);
+      if (ctx) card.appendChild(ctx);
+      card.appendChild(renderTextarea(q));
+      if (allowsImage(q)) card.appendChild(renderUpload(q));
+    }
+
+    return card;
+  }
+
+  function buildSubmission() {
+    return {
+      schema_version: '1.0',
+      quiz_id: QUIZ.quiz_id,
+      started_at: state.startedAt,
+      submitted_at: new Date().toISOString(),
+      duration_sec: Math.max(0, Math.round((Date.now() - Date.parse(state.startedAt)) / 1000)),
+      channel: CFG.channel || 'download',
+      client: { ua: navigator.userAgent, mode: QUIZ.mode },
+      answers: QUIZ.questions.map(function (q) {
+        var row = {
+          qid: q.id,
+          response: state.answers[q.id] == null ? null : state.answers[q.id],
+          changed: state.changed[q.id] || 0
+        };
+        var atts = state.attachments[q.id] || [];
+        if (atts.length) {
+          row.attachments = atts.map(function (att) {
+            return {
+              name: att.name,
+              media_type: att.media_type,
+              data_base64: (att.data_url.split(',')[1] || ''),
+              width: att.width,
+              height: att.height,
+              size: att.size
+            };
+          });
+        }
+        return row;
+      })
+    };
+  }
+
+  function filename() {
+    return CFG.filename || ('quiz-' + QUIZ.quiz_id + '.json');
+  }
+
+  function downloadJSON(payload) {
+    var blob = new Blob([payload], { type: 'application/json;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename();
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 1500);
+  }
+
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text).catch(function () {
+        return legacyCopy(text);
+      });
+    }
+    return Promise.resolve(legacyCopy(text));
+  }
+
+  function legacyCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    ta.remove();
+    if (!ok) throw new Error('copy failed');
+  }
+
+  function postPayload(payload) {
+    var endpoint = CFG.endpoint;
+    if (!endpoint) return Promise.reject(new Error('未配置 endpoint'));
+    var sep = endpoint.indexOf('?') >= 0 ? '&' : '?';
+    var url = endpoint + sep + 'token=' + encodeURIComponent(CFG.token || '');
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: payload
+    }).then(function (res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return true;
+    }).catch(function (err) {
+      var blob = new Blob([payload], { type: 'text/plain;charset=utf-8' });
+      var ok = false;
+      try { ok = navigator.sendBeacon && navigator.sendBeacon(url, blob); } catch (e) { ok = false; }
+      if (!ok) throw err;
+      return true;
+    });
+  }
+
+  function answerText(q) {
+    if (q.answer == null) return '见评分要点';
+    if (q.type === 'true_false') return normBool(q.answer) === 'true' ? '正确' : '错误';
+    if (q.type === 'multi_select') return arr(q.answer).join('、');
+    if (q.type === 'fill_blank') return Array.isArray(q.answer) ? q.answer.join(' / ') : String(q.answer);
+    if (typeof q.answer === 'object') return q.answer.reference || q.answer.text || JSON.stringify(q.answer);
+    return String(q.answer);
+  }
+
+  function localGrade(q) {
+    var resp = state.answers[q.id];
+    if (q.type === 'single_choice') return normalize(resp) === normalize(q.answer);
+    if (q.type === 'true_false') return normBool(resp) === normBool(q.answer);
+    if (q.type === 'multi_select') {
+      var a = arr(resp).map(normalize).sort();
+      var b = arr(q.answer).map(normalize).sort();
+      if (a.length !== b.length) return false;
+      for (var i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+      return true;
+    }
+    if (q.type === 'fill_blank') {
+      // 填空题由 Agent 按语义判分；客户端不做精确匹配，避免同义表述被误判。
+      return null;
+    }
+    return null;
+  }
+
+  function showPracticeResult() {
+    var correct = 0;
+    var objective = 0;
+    QUIZ.questions.forEach(function (q) {
+      var card = document.getElementById('q-' + q.id);
+      if (!card) return;
+      var verdict = localGrade(q);
+      var box = el('div', 'feedback');
+      var head = el('h4', null, '即时反馈');
+      box.appendChild(head);
+
+      if (verdict === null) {
+        box.appendChild(el('div', 'verdict manual', '此题型由 Agent 批改'));
+      } else {
+        objective++;
+        if (verdict) correct++;
+        box.appendChild(el('div', 'verdict ' + (verdict ? 'ok' : 'bad'), verdict ? '正确' : '错误'));
+        card.classList.add(verdict ? 'correct' : 'incorrect');
+      }
+
+      var refLine = el('div');
+      renderRich(refLine, '参考答案：' + answerText(q));
+      box.appendChild(refLine);
+
+      if (q.rubric && q.rubric.length) {
+        var ul = el('ul');
+        q.rubric.forEach(function (r) {
+          var point = el('li');
+          renderRich(point, r.point + '（' + r.weight + ' 分）');
+          ul.appendChild(point);
+        });
+        box.appendChild(el('div', null, '评分要点：'));
+        box.appendChild(ul);
+      }
+      if (q.explanation) {
+        var exp = el('div');
+        renderRich(exp, '解析：' + q.explanation);
+        box.appendChild(exp);
+      }
+      card.appendChild(box);
+    });
+
+    resultEl.hidden = false;
+    resultEl.innerHTML = '';
+    resultEl.appendChild(el('h2', null, '已提交'));
+    resultEl.appendChild(el('p', null,
+      '客观题即时反馈：' + correct + ' / ' + objective + '（仅练习模式参考，最终以 Agent 复算为准）'));
+    resultEl.appendChild(el('p', 'hint',
+      '请回到对话，告诉 Agent 已完成。提交文件名为 ' + filename() + '；若已复制到剪贴板，Agent 可直接读取。'));
+    resultEl.appendChild(actionButtons());
+    typeset(document.getElementById('questions'));
+    typeset(resultEl);
+    resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function showSubmitted() {
+    resultEl.hidden = false;
+    resultEl.innerHTML = '';
+    resultEl.appendChild(el('h2', null, '已提交'));
+    resultEl.appendChild(el('p', null, '试卷已锁定，请回到对话告诉 Agent 已完成。'));
+    resultEl.appendChild(el('p', 'hint',
+      '提交文件名为 ' + filename() + '；若已复制到剪贴板，Agent 可直接读取。'));
+    resultEl.appendChild(actionButtons());
+    typeset(resultEl);
+    resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function actionButtons() {
+    var wrap = el('div', 'actions');
+    var dl = el('button', null, '重新下载 JSON');
+    dl.type = 'button';
+    dl.addEventListener('click', function () {
+      downloadJSON(JSON.stringify(buildSubmission(), null, 2));
+      statusEl.textContent = '已重新下载 ' + filename();
+    });
+    var cp = el('button', null, '复制 JSON');
+    cp.type = 'button';
+    cp.addEventListener('click', function () {
+      copyText(JSON.stringify(buildSubmission(), null, 2)).then(function () {
+        statusEl.textContent = '已复制 JSON 到剪贴板';
+      }).catch(function () {
+        statusEl.textContent = '复制失败，请使用“重新下载 JSON”';
+      });
+    });
+    wrap.appendChild(dl);
+    wrap.appendChild(cp);
+    return wrap;
+  }
+
+  function lockUI() {
+    document.querySelectorAll('input, textarea, #btn-submit').forEach(function (n) {
+      n.disabled = true;
+    });
+  }
+
+  function submit() {
+    if (state.submitted) return;
+    var total = QUIZ.questions.length;
+    var done = QUIZ.questions.filter(isAnswered).length;
+    if (done === 0) {
+      if (!confirm('还没有作答，确定要提交空白卷吗？')) return;
+    } else if (done < total) {
+      if (!confirm('还有 ' + (total - done) + ' 题未作答，确定提交吗？')) return;
+    }
+
+    var btn = document.getElementById('btn-submit');
+    btn.disabled = true;
+    btn.textContent = '提交中…';
+
+    var submission = buildSubmission();
+    var payload = JSON.stringify(submission, null, 2);
+    var notes = [];
+    var hasImages = submission.answers.some(function (a) {
+      return a.attachments && a.attachments.length > 0;
+    });
+
+    var preCopy;
+    if (hasImages) {
+      notes.push('含图片，已跳过剪贴板');
+      preCopy = Promise.resolve();
+    } else {
+      preCopy = copyText(payload).then(function () {
+        notes.push('已复制到剪贴板');
+      }).catch(function () {
+        notes.push('剪贴板不可用');
+      });
+    }
+
+    preCopy.then(function () {
+      try {
+        downloadJSON(payload);
+        notes.push('已下载 ' + filename());
+      } catch (e) {
+        notes.push('下载失败：' + (e && e.message ? e.message : e));
+      }
+      if (CFG.channel === 'post' && CFG.endpoint) {
+        return postPayload(payload).then(function () {
+          notes.push('已提交到本地接收器');
+        }).catch(function (e) {
+          notes.push('本地接收器提交失败：' + (e && e.message ? e.message : e));
+        });
+      }
+    }).then(function () {
+      state.submitted = true;
+      persist();
+      lockUI();
+      btn.textContent = '已提交';
+      statusEl.textContent = notes.join('；');
+      if (QUIZ.mode === 'practice') showPracticeResult();
+      else showSubmitted();
+    });
+  }
+
+  function startTimer() {
+    var timer = document.getElementById('timer');
+    var limit = QUIZ.config && QUIZ.config.duration_min
+      ? QUIZ.config.duration_min * 60 : 0;
+    function tick() {
+      var sec = Math.max(0, Math.round((Date.now() - Date.parse(state.startedAt)) / 1000));
+      var shown = sec;
+      if (limit) shown = Math.max(0, limit - sec);
+      var mm = String(Math.floor(shown / 60)).padStart(2, '0');
+      var ss = String(shown % 60).padStart(2, '0');
+      timer.textContent = (limit && sec >= limit ? '超时 ' : '') + mm + ':' + ss;
+      if (limit && sec >= limit) timer.classList.add('over');
+      timer.dataset.seconds = String(sec);
+    }
+    tick();
+    setInterval(tick, 1000);
+  }
+
+  function init() {
+    var restored = restoreDraft();
+    if (restored) {
+      banner.hidden = false;
+      banner.className = 'banner';
+      banner.textContent = state.submitted
+        ? '检测到本卷已提交过，页面为只读状态。'
+        : '已恢复上次未提交的作答草稿。';
+    }
+
+    document.getElementById('quiz-id').textContent = QUIZ.quiz_id || '';
+    document.getElementById('mode-label').textContent =
+      QUIZ.mode === 'exam' ? '考试模式' : '练习模式';
+
+    var host = document.getElementById('questions');
+    QUIZ.questions.forEach(function (q) {
+      host.appendChild(renderQuestion(q));
+    });
+    typeset(host);
+
+    updateProgress();
+    startTimer();
+
+    document.getElementById('btn-submit').addEventListener('click', submit);
+
+    if (state.submitted) {
+      lockUI();
+      var btn = document.getElementById('btn-submit');
+      btn.textContent = '已提交';
+      statusEl.textContent = '本卷已提交。如需重新作答，请在浏览器中清除本站点数据后刷新。';
+    }
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

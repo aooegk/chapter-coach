@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppt-chapter-tutor/schemas/state.schema.json",
+  "title": "TutorState",
+  "description": "跨会话学习状态的唯一真源。",
+  "type": "object",
+  "required": ["schema_version", "course_id", "knowledge"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "course_id": { "type": "string", "minLength": 1 },
+    "mastery_rule": { "type": "string", "default": "v1" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "applied_quizzes": {
+      "type": "array",
+      "description": "已应用过的 quiz_id，用于防止重复批改或重复累加掌握度。",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "knowledge": {
+      "type": "object",
+      "description": "键为稳定知识点 ID，如 ch03.kp07。",
+      "additionalProperties": { "$ref": "#/$defs/kpState" }
+    },
+    "config_defaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "count": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "types": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "kpState": {
+      "type": "object",
+      "required": ["mastery", "attempts", "correct"],
+      "additionalProperties": false,
+      "properties": {
+        "title": { "type": "string" },
+        "mastery": { "type": "integer", "minimum": 0, "maximum": 5 },
+        "attempts": { "type": "integer", "minimum": 0 },
+        "correct": { "type": "integer", "minimum": 0 },
+        "streak": { "type": "integer", "minimum": 0 },
+        "sessions_correct": { "type": "integer", "minimum": 0 },
+        "last_seen": { "type": "string", "format": "date" },
+        "next_due": { "type": "string", "format": "date" },
+        "error_types": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  }
+}

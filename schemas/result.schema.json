@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppt-chapter-tutor/schemas/result.schema.json",
+  "title": "GradedResult",
+  "description": "批改结果。每一条都必须能追溯到 rubric 与 slide。",
+  "type": "object",
+  "required": ["schema_version", "quiz_id", "graded_at", "score", "items"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "quiz_id": { "type": "string" },
+    "graded_at": { "type": "string", "format": "date-time" },
+    "score": {
+      "type": "object",
+      "required": ["awarded", "max"],
+      "additionalProperties": false,
+      "properties": {
+        "awarded": { "type": "number", "minimum": 0 },
+        "max": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["qid", "awarded", "max_score", "provenance", "rubric"],
+        "additionalProperties": false,
+        "properties": {
+          "qid": { "type": "string", "pattern": "^q[0-9]{2,}$" },
+          "kp_ids": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "awarded": { "type": "number", "minimum": 0 },
+          "max_score": { "type": "number", "exclusiveMinimum": 0 },
+          "provenance": { "enum": ["deterministic", "agent", "hybrid"] },
+          "executed": {
+            "type": "boolean",
+            "description": "SQL 是否真正执行验证过。"
+          },
+          "rubric": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["point", "weight", "hit"],
+              "additionalProperties": false,
+              "properties": {
+                "point": { "type": "string" },
+                "weight": { "type": "number", "exclusiveMinimum": 0 },
+                "hit": { "type": "boolean" },
+                "evidence": { "type": "string" }
+              }
+            }
+          },
+          "error_type": {
+            "enum": [
+              "concept_confusion",
+              "missing_knowledge",
+              "procedure_error",
+              "careless",
+              "expression",
+              "incomplete",
+              "none"
+            ]
+          },
+          "confidence": { "enum": ["high", "medium", "low"] },
+          "transcript": {
+            "type": "string",
+            "description": "从作答图片中识别出的文字/公式/代码；未使用图片时省略。"
+          },
+          "attachments": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "作答图片的相对路径，如 media/q09-1.jpg。"
+          },
+          "vision_used": { "type": "boolean" },
+          "needs_manual_review": { "type": "boolean" },
+          "diagnosis": {
+            "type": "string",
+            "description": "错在哪里：具体指出学生答案与正确概念的差异。"
+          },
+          "fix": {
+            "type": "string",
+            "description": "怎么改：可执行的修正、正确步骤或改正后的 SQL。"
+          },
+          "feedback": { "type": "string" },
+          "review_slides": {
+            "type": "array",
+            "items": { "type": "integer", "minimum": 1 }
+          },
+          "client_discrepancy": { "type": "number" }
+        }
+      }
+    }
+  }
+}

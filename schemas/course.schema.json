@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppt-chapter-tutor/schemas/course.schema.json",
+  "title": "CourseProfile",
+  "description": "课程级画像：学科、期末考纲题型、以及可用的题型注册表。",
+  "type": "object",
+  "required": ["schema_version", "course_id", "subject", "exam_blueprint", "type_registry"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "course_id": { "type": "string", "minLength": 1 },
+    "subject": { "type": "string", "minLength": 1 },
+    "exam_blueprint": {
+      "type": "object",
+      "required": ["source", "types"],
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "enum": ["user", "inferred", "unknown"],
+          "description": "user=用户提供；inferred=根据课件/学科推断；unknown=尚不清楚"
+        },
+        "total_score": { "type": "number", "exclusiveMinimum": 0 },
+        "duration_min": { "type": "integer", "minimum": 1 },
+        "closed_book": { "type": "boolean" },
+        "types": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["type", "label"],
+            "additionalProperties": false,
+            "properties": {
+              "type": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+              "label": { "type": "string", "minLength": 1 },
+              "count": { "type": "integer", "minimum": 0 },
+              "score": { "type": "number", "minimum": 0 },
+              "grading": {
+                "enum": ["deterministic", "rubric", "execution", "execution_or_rubric", "hybrid"]
+              },
+              "render": { "enum": ["choice", "text", "code", "sql", "drawing"] }
+            }
+          }
+        },
+        "notes": { "type": "string" }
+      }
+    },
+    "type_registry": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "label", "grading"],
+        "additionalProperties": false,
+        "properties": {
+          "type": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "label": { "type": "string", "minLength": 1 },
+          "render": { "enum": ["choice", "text", "code", "sql", "drawing"] },
+          "grading": {
+            "enum": ["deterministic", "rubric", "execution", "execution_or_rubric", "hybrid"]
+          },
+          "default_score": { "type": "number", "minimum": 0 },
+          "notes": { "type": "string" }
+        }
+      }
+    }
+  }
+}

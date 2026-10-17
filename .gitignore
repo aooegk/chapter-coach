@@ -1,0 +1,18 @@
+# 本地学习数据，不要提交
+**/.ppt-tutor/
+**/media/
+*.pptx
+*.ppt
+
+# Python
+__pycache__/
+*.pyc
+
+# 本地示例数据
+examples/
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

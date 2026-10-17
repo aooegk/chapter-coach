@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppt-chapter-tutor/schemas/submission.schema.json",
+  "title": "Submission",
+  "description": "HTML 回传的原始作答，不含权威分数。",
+  "type": "object",
+  "required": ["schema_version", "quiz_id", "started_at", "submitted_at", "channel", "answers"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "quiz_id": { "type": "string" },
+    "started_at": { "type": "string", "format": "date-time" },
+    "submitted_at": { "type": "string", "format": "date-time" },
+    "duration_sec": { "type": "integer", "minimum": 0 },
+    "channel": { "enum": ["automation", "post", "download", "clipboard", "paste"] },
+    "client": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "client_score": {
+      "type": ["object", "null"],
+      "description": "仅 practice 模式的即时反馈，不具权威性。"
+    },
+    "answers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["qid"],
+        "anyOf": [
+          { "required": ["response"] },
+          { "required": ["attachments"] }
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "qid": { "type": "string", "pattern": "^q[0-9]{2,}$" },
+          "response": {
+            "type": ["string", "array", "object", "number", "boolean", "null"]
+          },
+          "attachments": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 5,
+            "items": {
+              "type": "object",
+              "required": ["media_type"],
+              "additionalProperties": false,
+              "properties": {
+                "name": { "type": "string" },
+                "media_type": {
+                  "enum": ["image/jpeg", "image/png", "image/webp"]
+                },
+                "data_base64": { "type": "string" },
+                "path": { "type": "string" },
+                "width": { "type": "integer", "minimum": 1 },
+                "height": { "type": "integer", "minimum": 1 },
+                "size": { "type": "integer", "minimum": 0 }
+              }
+            }
+          },
+          "time_sec": { "type": "integer", "minimum": 0 },
+          "changed": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  }
+}

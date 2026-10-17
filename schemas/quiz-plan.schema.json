@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ppt-chapter-tutor/schemas/quiz-plan.schema.json",
+  "title": "QuizPlan",
+  "description": "命题前的覆盖计划，先定考点再生成题目。",
+  "type": "object",
+  "required": ["quiz_id", "chapter_id", "config", "coverage"],
+  "additionalProperties": false,
+  "properties": {
+    "quiz_id": { "type": "string", "pattern": "^[0-9]{8}-ch[0-9]{2,}-[0-9]{2}$" },
+    "chapter_id": { "type": "string", "pattern": "^ch[0-9]{2,}$" },
+    "mode": { "enum": ["practice", "exam"], "default": "practice" },
+    "config": {
+      "type": "object",
+      "required": ["count", "types"],
+      "additionalProperties": false,
+      "properties": {
+        "count": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "types": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        },
+        "difficulty": { "type": "integer", "minimum": 1, "maximum": 5 }
+      }
+    },
+    "coverage": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["kp_id", "source", "questions", "reason"],
+        "additionalProperties": false,
+        "properties": {
+          "kp_id": { "type": "string", "pattern": "^ch[0-9]{2,}\\.kp[0-9]{2,}$" },
+          "source": { "enum": ["current", "review"] },
+          "questions": { "type": "integer", "minimum": 1 },
+          "reason": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}
