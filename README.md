@@ -459,7 +459,3 @@ python scripts/apply_result.py ... --reset
 - 作者：aooegk
 - 仓库：https://github.com/aooegk/ppt-chapter-tutor
 - 问题与建议：欢迎提交 Issue 或 PR。
-
----
-
-如果你准备发布，建议再补 3 张截图：试卷页（含图片上传）、`review.html` 结果页、`.ppt-tutor` 目录结构。
