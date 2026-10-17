@@ -15,7 +15,6 @@
 - [核心特性](#核心特性)
 - [截图](#截图)
 - [工作方式](#工作方式)
-- [章节学习](#章节学习)
 - [快速开始](#快速开始)
 - [使用方法](#使用方法)
 - [目录结构](#目录结构)
@@ -23,7 +22,6 @@
 - [两种模式与答案下发](#两种模式与答案下发)
 - [图片作答](#图片作答)
 - [批改与学习状态](#批改与学习状态)
-- [报告与错题本](#报告与错题本)
 - [公式渲染](#公式渲染)
 - [跨平台能力分级](#跨平台能力分级)
 - [常见问题](#常见问题)
@@ -69,82 +67,6 @@ state.json / attempts / report.md / wrongbook.md / review.html
 
 一条重要分工：**脚本只做确定性的抽取、校验、构建、落盘和记账；评分由 Agent 完成。** `apply_result.py` 不会替你判分，它只接收已经写好的 `result.json`。
 
-## 章节学习
-
-学习是对话式的，不需要先出题。推荐路径：**总览 → 追问 → 出题 → 批改**。
-
-```text
-PPT
- ↓ 抽取
-knowledge/ch03.json          每个知识点：标题、摘要、slide 页码
- ↓
-总览（一屏）                  每个 KP 1–2 句 + slide 号
- ↓ 你追问某个 KP
-单点讲解                      只读取该 KP 的 slide，按需深入
- ↓ 学完
-配置闸门 → 命题 → 答题 → 批改
-```
-
-### 1. 总览
-
-你可以直接说：
-
-> 用 `ch03.pptx` 学第三章，先给我知识点总览。
-
-Agent 会从 `knowledge/ch03.json` 生成类似：
-
-> 本章 6 个知识点：
-> - `ch03.kp01` 函数依赖（PPT 第 5–6 页）：属性间的决定关系，候选键是最小决定集。
-> - `ch03.kp02` 范式与规范化（第 8–10 页）：2NF/3NF/BCNF 逐级消除部分依赖与传递依赖。
-> - `ch03.kp03` ER 图转关系模式（第 14–16 页）：按联系基数决定是否单独建表。
-> - …
-
-总览只给标题、1–2 句摘要和页码，不会把整章原文一次倒出来；这样上下文不会被撑爆。
-
-### 2. 追问
-
-看到不熟的点，直接追问：
-
-> 讲讲 `ch03.kp04`，特别是 3NF 和 BCNF 的区别。
-
-Agent 只读取 `ch03.kp04` 对应的 slide，展开讲解。PPT 没覆盖、属于补充的内容会明确标注，不会混在课件原文里。你也可以要求它举例、对比、画表格，或回到某一张 slide 逐句解释。
-
-### 3. 出题
-
-学完一章后，Agent 会先给你配置表：
-
-| 项目 | 例子 |
-| --- | --- |
-| 模式 | practice / exam |
-| 题数 | 8 |
-| 题型 | 单选 4、简答 2、SQL 2 |
-| 难度 | 3 |
-| 范围 | 仅本章 / 含历史复习 |
-
-确认后才生成覆盖计划、题目、质检结果和 `exam.html`。不会静默使用默认值。
-
-### 4. 批改
-
-在浏览器提交后：
-
-1. Agent 读取 `submission.json` 和 `media/` 里的图片；
-2. 客观题复算，主观题按 rubric 逐点给分；
-3. 写入 `result.json`；
-4. 更新 `state.json`、`wrongbook.md`，生成 `report.md` 和 `review.html`；
-5. 在对话里告诉你得分、错在哪、下次复习时间。
-
-### 产物位置
-
-| 阶段 | 产物 |
-| --- | --- |
-| 学习 | `.ppt-tutor/knowledge/ch03.json` |
-| 出题 | `.ppt-tutor/sessions/<quiz_id>/plan.json`、`quiz.json`、`exam.html` |
-| 答题 | `.ppt-tutor/sessions/<quiz_id>/submission.json`、`media/` |
-| 批改 | `.ppt-tutor/sessions/<quiz_id>/result.json`、`report.md`、`review.html` |
-| 长期状态 | `.ppt-tutor/state.json`、`wrongbook.md`、`attempts/` |
-
-学习阶段本身不生成 HTML；HTML 只用于答题和批改结果页。
-
 ## 快速开始
 
 ### 前置条件
@@ -167,7 +89,7 @@ Agent 只读取 `ch03.kp04` 对应的 slide，展开讲解。PPT 没覆盖、属
 
 `SKILL.md` 的 frontmatter 名称是 `chapter-coach`。如果加载器要求目录名与技能名一致，把目录重命名为 `chapter-coach` 即可。
 
-### 最小流程
+### 最小命令流程
 
 ```bash
 # 1. 抽取课件（A 档）
@@ -222,22 +144,13 @@ python scripts/build_review.py \
 
 ## 使用方法
 
-这一节说明：技能怎么装、课程资料怎么给、结果在哪里。
+安装见[快速开始](#快速开始)。下面按一次完整使用的顺序说明：上传资料 → 学习 → 出题 → 答题 → 批改 → 上传 GitHub。
 
-### 1.安装技能
-安装位置：
+### 1. 上传课程资料
 
-- ZCode：`~/.zcode/skills/chapter-coach/`
-- Claude Code：`~/.claude/skills/chapter-coach/`
-- Codex：平台对应的 skill 目录
-
-上传到 GitHub 时，`.gitignore` 已排除 `.ppt-tutor/`、`media/`、`*.pptx`、`*.ppt`。不要用网页拖拽的方式绕过 `.gitignore`。
-
-### 2. 上传课程资料并开始
-
-1. 在电脑上建一个课程目录，。
-2. 把对应课程ppt放进去。
-3. 对 Agent 说：“用 （ppt的路径名）学习（ppt名称），先给我知识点总览。”
+1. 在电脑上建一个课程目录，例如 `D:\课程\数据库\`。
+2. 把对应课程的 PPT 放进去。
+3. 对 Agent 说：“用 `D:\课程\数据库\ch03.pptx` 学习第三章，先给我知识点总览。”
 
 Agent 会：
 
@@ -246,6 +159,22 @@ Agent 会：
 - 问你期末题型（如果 `course.json` 还没有），写入 `.ppt-tutor/course.json`
 
 课程资料只在本地读取；除非你明确要求，不会上传到外部服务。
+
+### 2. 学习一章：总览 → 追问
+
+Agent 先给一屏总览，每个知识点 1–2 句 + slide 页码：
+
+> 本章 6 个知识点：
+> - `ch03.kp01` 函数依赖（PPT 第 5–6 页）：属性间的决定关系，候选键是最小决定集。
+> - `ch03.kp02` 范式与规范化（第 8–10 页）：2NF/3NF/BCNF 逐级消除部分依赖与传递依赖。
+> - `ch03.kp03` ER 图转关系模式（第 14–16 页）：按联系基数决定是否单独建表。
+> - …
+
+看到不熟的点直接追问：
+
+> 讲讲 `ch03.kp04`，特别是 3NF 和 BCNF 的区别。
+
+Agent 只读取该知识点对应的 slide 展开讲解；PPT 没覆盖的补充内容会明确标注。总览不会一次倒出整章原文，避免上下文被撑爆。学习阶段不生成 HTML。
 
 ### 3. 出题前确认配置
 
@@ -259,7 +188,7 @@ Agent 会：
 | 难度 | 3 |
 | 范围 | 仅本章 / 含历史复习 |
 
-你确认后才会生成题目；说“默认”也会把实际配置写出来。
+确认后才生成覆盖计划、题目、质检结果和 `exam.html`。说“默认”也会把实际配置写出来，不会静默使用默认值。
 
 ### 4. 答题与提交
 
@@ -273,7 +202,13 @@ Agent 生成 `sessions/<quiz_id>/exam.html` 并打开。你在浏览器里：
 - localhost 接收器：直接写 `submission.json` 与 `media/`
 - 下载/剪贴板：Agent 读取后调用 `extract_attachments.py`
 
-### 5. 输出什么，在哪里
+### 5. 批改与输出
+
+Agent 读取 `submission.json` 与 `media/`，客观题复算、主观题按 rubric 逐点判分，然后：
+
+- 更新 `state.json`、`wrongbook.md`
+- 生成 `result.json`、`report.md`、`review.html`
+- 在对话里告诉你得分、错在哪、下次复习时间
 
 所有产物都在课程目录的 `.ppt-tutor/` 下：
 
@@ -409,14 +344,6 @@ python scripts/apply_result.py ... --reset
 
 `--reset` 会从 knowledge 重建状态，避免重复累加。
 
-## 报告与错题本
-
-- `result.json`：机器可读的逐题批改数据。
-- `report.md`：Markdown 报告，适合归档和二次编辑。
-- `review.html`：给人看的结果页，含参考答案、rubric 证据、错在哪里、怎么改、作答图片、识别结果。
-- `wrongbook.md`：按 KP 分组的错题本，从 `attempts/*.jsonl` 重建。
-- `attempts/<quiz_id>.jsonl`：逐题追加，支持审计与重批。
-
 ## 公式渲染
 
 公式统一用 `$...$` 包裹，由内联 MathJax 3.2.2（TeX→SVG）按完整 LaTeX 规则渲染；离线可用，不依赖 CDN，也不需要额外字体文件。
@@ -451,6 +378,10 @@ python scripts/apply_result.py ... --reset
 5. 用户粘贴 JSON
 
 ## 常见问题
+
+**学习和出题是分开的吗？** 是顺序上的两个阶段，但不必每次都出题。你可以只看总览、追问几个知识点就结束；想练的时候再进入配置和出题。
+
+**总览会一次给出整章内容吗？** 不会。总览只给每个 KP 的标题、1–2 句摘要和 slide 页码；深入讲解要等你指定某个知识点。
 
 **端口被占用？** 换一个端口，或用 `--port 0` 自动分配；换端口后要重新构建 `exam.html` 里的 endpoint。
 
