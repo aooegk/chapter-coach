@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ppt-chapter-tutor/schemas/knowledge.schema.json",
+  "$id": "https://chapter-coach/schemas/knowledge.schema.json",
   "title": "ChapterKnowledge",
   "description": "一章的知识点划分，必须能映射回 slide。",
   "type": "object",

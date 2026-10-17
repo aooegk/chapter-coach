@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ppt-chapter-tutor/schemas/quiz-plan.schema.json",
+  "$id": "https://chapter-coach/schemas/quiz-plan.schema.json",
   "title": "QuizPlan",
   "description": "命题前的覆盖计划，先定考点再生成题目。",
   "type": "object",

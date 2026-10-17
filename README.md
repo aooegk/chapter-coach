@@ -1,6 +1,6 @@
-# ppt-chapter-tutor
+# chapter-coach
 
-> 用本地 PPT 逐章学习、按期末考纲出题、浏览器答题、拍照提交、可追溯批改的本地 AI 学习助手。
+> **ChapterCoach · 章节教练** — 用本地 PPT 逐章学习、按期末考纲出题、浏览器答题、拍照提交、可追溯批改的自学助手。
 
 一套面向 Codex、Claude Code、ZCode 等本地 AI Agent 的技能包。每个会话处理一章：先把课件整理成带页码的知识点，再按你的期末题型配置出题；浏览器作答（支持手写拍照），Agent 复算客观题、按 rubric 批改主观题，最后生成成绩、错题本和批改结果页。
 
@@ -84,11 +84,11 @@ state.json / attempts / report.md / wrongbook.md / review.html
 
 | 平台 | 位置 |
 | --- | --- |
-| ZCode | `~/.zcode/skills/ppt-chapter-tutor/` |
-| Claude Code | `~/.claude/skills/ppt-chapter-tutor/` |
+| ZCode | `~/.zcode/skills/chapter-coach/` |
+| Claude Code | `~/.claude/skills/chapter-coach/` |
 | Codex | 按该平台的 skill 目录约定放置 |
 
-`SKILL.md` 的 frontmatter 名称是 `ppt-chapter-tutor`。如果加载器要求目录名与技能名一致，把目录重命名为 `ppt-chapter-tutor` 即可。
+`SKILL.md` 的 frontmatter 名称是 `chapter-coach`。如果加载器要求目录名与技能名一致，把目录重命名为 `chapter-coach` 即可。
 
 ### 最小流程
 
@@ -160,8 +160,8 @@ python scripts/build_review.py \
 
 安装位置：
 
-- ZCode：`~/.zcode/skills/ppt-chapter-tutor/`
-- Claude Code：`~/.claude/skills/ppt-chapter-tutor/`
+- ZCode：`~/.zcode/skills/chapter-coach/`
+- Claude Code：`~/.claude/skills/chapter-coach/`
 - Codex：平台对应的 skill 目录
 
 上传到 GitHub 时，`.gitignore` 已排除 `.ppt-tutor/`、`media/`、`*.pptx`、`*.ppt`。不要用网页拖拽的方式绕过 `.gitignore`。
@@ -457,5 +457,5 @@ python scripts/apply_result.py ... --reset
 ## 作者与贡献
 
 - 作者：aooegk
-- 仓库：https://github.com/aooegk/ppt-chapter-tutor
+- 仓库：https://github.com/aooegk/chapter-coach
 - 问题与建议：欢迎提交 Issue 或 PR。

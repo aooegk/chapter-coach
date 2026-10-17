@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ppt-chapter-tutor/schemas/result.schema.json",
+  "$id": "https://chapter-coach/schemas/result.schema.json",
   "title": "GradedResult",
   "description": "批改结果。每一条都必须能追溯到 rubric 与 slide。",
   "type": "object",

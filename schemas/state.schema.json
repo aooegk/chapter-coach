@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ppt-chapter-tutor/schemas/state.schema.json",
+  "$id": "https://chapter-coach/schemas/state.schema.json",
   "title": "TutorState",
   "description": "跨会话学习状态的唯一真源。",
   "type": "object",

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ppt-chapter-tutor/schemas/quiz.schema.json",
+  "$id": "https://chapter-coach/schemas/quiz.schema.json",
   "title": "Quiz",
   "description": "试卷与答案（Agent 侧真源）。exam.html 由此生成。",
   "type": "object",

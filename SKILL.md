@@ -1,5 +1,5 @@
 ---
-name: ppt-chapter-tutor
+name: chapter-coach
 description: 基于本地 PPT 逐章学习、讲解与出题批改。当用户要求“用课件/PPT 学某一章”“根据 PPT 出题、小测、复习”“生成章节练习并批改”“整理错题与掌握度”时使用。每个会话只处理一章，支持跨章累计复习。
 ---
 

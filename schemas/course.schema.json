@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ppt-chapter-tutor/schemas/course.schema.json",
+  "$id": "https://chapter-coach/schemas/course.schema.json",
   "title": "CourseProfile",
   "description": "课程级画像：学科、期末考纲题型、以及可用的题型注册表。",
   "type": "object",

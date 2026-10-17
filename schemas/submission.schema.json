@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ppt-chapter-tutor/schemas/submission.schema.json",
+  "$id": "https://chapter-coach/schemas/submission.schema.json",
   "title": "Submission",
   "description": "HTML 回传的原始作答，不含权威分数。",
   "type": "object",

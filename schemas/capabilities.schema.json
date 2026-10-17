@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ppt-chapter-tutor/schemas/capabilities.schema.json",
+  "$id": "https://chapter-coach/schemas/capabilities.schema.json",
   "title": "Capabilities",
   "description": "会话启动时的环境探测结果，后续分支只读此文件。",
   "type": "object",
