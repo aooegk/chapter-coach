@@ -147,17 +147,7 @@ python scripts/build_review.py \
 
 这一节说明：技能怎么装、课程资料怎么给、结果在哪里。
 
-### 1. 上传/安装技能
-
-只需要上传技能代码，不需要上传课件或作答图片：
-
-| 要上传 | 不要上传 |
-| --- | --- |
-| `SKILL.md`、`README.md`、`LICENSE` | `examples/` 里的真实课件 |
-| `references/`、`schemas/`、`assets/`、`scripts/` | `.ppt-tutor/`（本地学习数据） |
-| `docs/`（截图） | `media/`（作答照片） |
-| 可选的合成演示 | `*.pptx`、`*.ppt` |
-
+### 1.安装技能
 安装位置：
 
 - ZCode：`~/.zcode/skills/chapter-coach/`
@@ -168,9 +158,9 @@ python scripts/build_review.py \
 
 ### 2. 上传课程资料并开始
 
-1. 在电脑上建一个课程目录，例如 `D:\课程\数据库\`。
-2. 把 `ch03.pptx` 放进去。
-3. 对 Agent 说：“用 `D:\课程\数据库\ch03.pptx` 学第三章，先给我知识点总览。”
+1. 在电脑上建一个课程目录，。
+2. 把对应课程ppt放进去。
+3. 对 Agent 说：“用 （ppt的路径名）学习（ppt名称），先给我知识点总览。”
 
 Agent 会：
 
@@ -188,7 +178,7 @@ Agent 会：
 | --- | --- |
 | 模式 | practice / exam |
 | 题数 | 8 |
-| 题型 | 单选 4、简答 2、SQL 2 |
+| 题型 | 单选 4、简答 2 |
 | 难度 | 3 |
 | 范围 | 仅本章 / 含历史复习 |
 
