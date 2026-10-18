@@ -16,6 +16,12 @@ wrongbook.md
 
 Markdown 与 HTML 都是**派生视图**，不得作为后续计算的输入。
 
+## review.html 只显示错题
+
+默认只收录 `awarded < max_score` 的题；答对的题不展开，只在摘要里给出“答对 X / 共 Y 题”。需要完整回顾时用 `build_review.py --include-correct`。
+
+结果页不显示正确题，不代表记录丢失：原始作答在 `submission.json`，图片在 `media/`，逐题记录在 `attempts/*.jsonl`。
+
 ## report.md 结构
 
 ```markdown

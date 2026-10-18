@@ -112,7 +112,7 @@ def inject_mathjax(document: str) -> str:
 
 
 def build_review(quiz: dict, result: dict, submission: dict | None,
-                 knowledge: dict | None) -> dict:
+                 knowledge: dict | None, include_correct: bool = False) -> dict:
     questions = {q["id"]: q for q in quiz.get("questions", [])}
     answer_objs = {a.get("qid"): a for a in (submission or {}).get("answers", [])}
     kp_titles = {kp["id"]: kp.get("title", "") for kp in (knowledge or {}).get("knowledge_points", [])}
@@ -120,6 +120,7 @@ def build_review(quiz: dict, result: dict, submission: dict | None,
     items = []
     obj_awarded = obj_max = subj_awarded = subj_max = 0
     knowledge_errors = procedure_errors = other_errors = 0
+    total_count = correct_count = 0
 
     for result_item in result.get("items", []):
         qid = result_item.get("qid")
@@ -144,6 +145,10 @@ def build_review(quiz: dict, result: dict, submission: dict | None,
         kp_ids = result_item.get("kp_ids") or q.get("kp_ids") or []
         awarded = float(result_item.get("awarded", 0))
         max_score = float(result_item.get("max_score", 0))
+        total_count += 1
+        fully_correct = awarded >= max_score - 1e-9
+        if fully_correct:
+            correct_count += 1
 
         if qtype in OBJECTIVE:
             obj_awarded += awarded
@@ -160,7 +165,7 @@ def build_review(quiz: dict, result: dict, submission: dict | None,
         elif error_type in ("careless", "expression"):
             other_errors += 1
 
-        items.append({
+        item = {
             "qid": qid,
             "type": qtype,
             "type_label": TYPE_LABELS.get(qtype, qtype.replace("custom:", "") if qtype else ""),
@@ -185,7 +190,9 @@ def build_review(quiz: dict, result: dict, submission: dict | None,
             "attachments": attachments,
             "transcript": result_item.get("transcript", ""),
             "review_slides": result_item.get("review_slides") or q.get("source_slides") or [],
-        })
+        }
+        if include_correct or not fully_correct:
+            items.append(item)
 
     return {
         "quiz_id": result.get("quiz_id") or quiz.get("quiz_id"),
@@ -201,6 +208,10 @@ def build_review(quiz: dict, result: dict, submission: dict | None,
             "knowledge_errors": knowledge_errors,
             "procedure_errors": procedure_errors,
             "other_errors": other_errors,
+            "total_count": total_count,
+            "correct_count": correct_count,
+            "wrong_count": total_count - correct_count,
+            "wrong_only": not include_correct,
         },
         "items": items,
     }
@@ -214,6 +225,11 @@ def main() -> int:
     parser.add_argument("--knowledge", type=Path)
     parser.add_argument("--template", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument(
+        "--include-correct",
+        action="store_true",
+        help="结果页也展示答对的题目；默认只显示未满分题",
+    )
     args = parser.parse_args()
 
     quiz = load_json(args.quiz)
@@ -221,7 +237,10 @@ def main() -> int:
     submission = load_json(args.submission, optional=True) if args.submission else None
     knowledge = load_json(args.knowledge, optional=True) if args.knowledge else None
 
-    review = build_review(quiz, result, submission, knowledge)
+    review = build_review(
+        quiz, result, submission, knowledge,
+        include_correct=args.include_correct,
+    )
     document = args.template.read_text(encoding="utf-8")
     document = document.replace("__TITLE__", html.escape(review["title"]))
     document = replace_block(document, "review-data", embed_json(review))
@@ -231,6 +250,7 @@ def main() -> int:
     args.out.write_text(document, encoding="utf-8")
     print(f"[ok] 已生成 {args.out}")
     print(f"[ok] 得分: {review['score']['awarded']} / {review['score']['max']}")
+    print(f"[ok] 结果页题目: {len(review['items'])}（错题 {review['summary']['wrong_count']} / 共 {review['summary']['total_count']}）")
     return 0
 
 

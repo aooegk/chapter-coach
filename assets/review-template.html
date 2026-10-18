@@ -46,6 +46,8 @@
     padding: 18px 20px; margin-bottom: 14px;
   }
   .item.ok { border-left: 4px solid var(--ok); }
+  .item h2 { margin: 0 0 8px; font-size: 20px; }
+  .item p { margin: 6px 0; }
   .item.partial { border-left: 4px solid var(--warn); }
   .item.bad { border-left: 4px solid var(--bad); }
   .item-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
@@ -317,7 +319,8 @@
     return (list || []).indexOf(String(key).toLowerCase()) >= 0;
   }
 
-  document.title = DATA.title + ' · 批改报告';
+  var pageLabel = DATA.summary && DATA.summary.wrong_only ? '错题回顾' : '批改报告';
+  document.title = DATA.title + ' · ' + pageLabel;
   document.getElementById('title').textContent = DATA.title;
   document.getElementById('meta').textContent =
     DATA.quiz_id + ' · ' + (DATA.mode === 'exam' ? '考试模式' : '练习模式') +
@@ -333,6 +336,8 @@
   [
     ['客观题', (s.objective_awarded || 0) + ' / ' + (s.objective_max || 0)],
     ['主观题', (s.subjective_awarded || 0) + ' / ' + (s.subjective_max || 0)],
+    ['答对', (s.correct_count || 0) + ' / ' + (s.total_count || 0) + ' 题'],
+    ['错题', (s.wrong_count || 0) + ' 题'],
     ['知识类错误', (s.knowledge_errors || 0) + ' 题'],
     ['过程/语法错误', (s.procedure_errors || 0) + ' 题'],
     ['表达/笔误', (s.other_errors || 0) + ' 题']
@@ -342,6 +347,12 @@
     box.appendChild(el('b', null, pair[1]));
     summary.appendChild(box);
   });
+
+  if (s.wrong_only) {
+    var onlyNote = el('div', 'note');
+    onlyNote.textContent = '本页只显示未满分题；答对的题目不展开。';
+    summary.parentNode.insertBefore(onlyNote, summary.nextSibling);
+  }
 
   var host = document.getElementById('items');
 
@@ -472,6 +483,13 @@
 
     host.appendChild(card);
   });
+
+  if (!DATA.items.length) {
+    var empty = el('section', 'item ok');
+    empty.appendChild(el('h2', null, '全部答对'));
+    empty.appendChild(el('p', null, '没有错题需要回顾。原始作答与逐题记录已保存在 submission.json、media/ 和 attempts/。'));
+    host.appendChild(empty);
+  }
 
   typeset(host);
 })();

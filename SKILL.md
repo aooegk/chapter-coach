@@ -211,9 +211,9 @@ description: 基于本地 PPT 逐章学习、讲解与出题批改。当用户�
 - 原子写回 `state.json`，追加 attempts JSONL。
 - A 档可用 `scripts/apply_result.py` 完成确定性记账（掌握度、attempts、报告、错题本）；**评分本身仍由你完成**，不要把这个脚本当成评分器。
 - 重建 `wrongbook.md`（按 KP 分组，附 slide 号与证据）和 `sessions/<quiz_id>/report.md`。
-- 每轮批改后默认生成 `review.html`（参考答案、rubric 证据、错在哪里、怎么改、作答图片与识别结果）；`exam` 模式必须生成。
+- 每轮批改后默认生成 `review.html`，**默认只收录未满分题**（参考答案、rubric 证据、错在哪里、怎么改、作答图片与识别结果）；全部答对时显示“全部答对”，不展开正确题。需要完整回顾时用 `build_review.py --include-correct`；`exam` 模式必须生成。
 - 报告可导出 HTML；Word 仅在 A 档且用户要求时生成。
-- 最后向用户汇报：得分、逐题结果、掌握度变化、下次复习建议。不要只丢一个总分。
+- 最后向用户汇报：得分、错题与错因、掌握度变化、下次复习建议。不要只丢一个总分。
 
 ## 六、错误处理
 

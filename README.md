@@ -27,6 +27,7 @@
 - [常见问题](#常见问题)
 - [限制与路线图](#限制与路线图)
 - [开发与测试](#开发与测试)
+- [更新日志](#更新日志)
 - [许可与致谢](#许可与致谢)
 
 ## 核心特性
@@ -37,6 +38,7 @@
 - **浏览器答题**：单文件离线 HTML，自动保存草稿，提交后通过 localhost / 下载 / 剪贴板回传。
 - **图片作答**：证明、计算、作图、手写 SQL、长简答可以拍照上传；浏览器内压缩，本地落盘。
 - **可追溯批改**：客观题由 Agent 复算；主观题按 rubric 逐点给分，必须给出“错在哪里 / 怎么改”。
+- **错题优先**：结果页默认只显示未满分题；全部答对时显示无错题状态。
 - **语义判分**：同义表述、不同写法、不同解法都接受，不死扣字眼。
 - **学习状态**：稳定知识点 ID、掌握度、下次复习时间、错题本，跨章节复用。
 - **完整 LaTeX**：内联 MathJax 3.2.2（TeX→SVG），离线排版分式、根号、矩阵、cases 等。
@@ -207,7 +209,7 @@ Agent 生成 `sessions/<quiz_id>/exam.html` 并打开。你在浏览器里：
 Agent 读取 `submission.json` 与 `media/`，客观题复算、主观题按 rubric 逐点判分，然后：
 
 - 更新 `state.json`、`wrongbook.md`
-- 生成 `result.json`、`report.md`、`review.html`
+- 生成 `result.json`、`report.md`、`review.html`（默认只收录未满分题）
 - 在对话里告诉你得分、错在哪、下次复习时间
 
 所有产物都在课程目录的 `.ppt-tutor/` 下：
@@ -221,10 +223,12 @@ Agent 读取 `submission.json` 与 `media/`，客观题复算、主观题按 rub
 | 作答图片 | `.ppt-tutor/sessions/<quiz_id>/media/` | 手写照片 |
 | 批改结果 | `.ppt-tutor/sessions/<quiz_id>/result.json` | 逐题分数、rubric、证据 |
 | Markdown 报告 | `.ppt-tutor/sessions/<quiz_id>/report.md` | 归档/编辑 |
-| 结果页 | `.ppt-tutor/sessions/<quiz_id>/review.html` | 参考答案、错因、改法、原图 |
+| 结果页 | `.ppt-tutor/sessions/<quiz_id>/review.html` | 只含未满分题：参考答案、错因、改法、原图 |
 | 学习状态 | `.ppt-tutor/state.json` | 掌握度、下次复习 |
 | 错题本 | `.ppt-tutor/wrongbook.md` | 按 KP 分组 |
 | 逐题记录 | `.ppt-tutor/attempts/<quiz_id>.jsonl` | 审计与重批 |
+
+原始作答与图片保存在 `submission.json` 与 `media/`，逐题记录在 `attempts/<quiz_id>.jsonl`，可用于重批和审计。
 
 ## 目录结构
 
@@ -282,8 +286,8 @@ Agent 读取 `submission.json` 与 `media/`，客观题复算、主观题按 rub
 
 | 模式 | HTML 中的答案 | 提交后 | 批改后 |
 | --- | --- | --- | --- |
-| `practice` | 可内嵌答案与 rubric | 页面显示即时反馈，标注“非权威” | 生成报告与 review |
-| `exam` | 不包含答案与 `expected_rows` | 只提示已提交 | 生成 `review.html`，此时才展示答案与解析 |
+| `practice` | 可内嵌答案与 rubric | 页面显示即时反馈，标注“非权威” | 生成报告与 review（只显示错题） |
+| `exam` | 不包含答案与 `expected_rows` | 只提示已提交 | 生成 `review.html`（只显示错题），此时才展示答案与解析 |
 
 题干不写提示：不把“写出步骤”“只写答案不给分”“本题考查……”放进题干，评分规则只放在 `quiz.json`。
 
@@ -318,6 +322,8 @@ python scripts/apply_result.py ... --reset
 ```
 
 `--reset` 会从 knowledge 重建状态，避免重复累加。
+
+结果页默认只收录 `awarded < max_score` 的题；需要完整回顾时运行 `build_review.py --include-correct`。原始作答和逐题记录不会因此丢失。
 
 ## 公式渲染
 
@@ -402,6 +408,13 @@ python scripts/apply_result.py ... --reset
 
 - `examples/db-ch3/`：数据库课件测试。
 - `examples/math-demo/`：数学证明/计算与图片作答测试。
+
+## 更新日志
+
+见 [CHANGELOG.md](CHANGELOG.md)。
+
+- **v1.1.0**：结果页默认只显示错题；全部答对时显示无错题状态；新增 `--include-correct`。
+- **v1.0.0**：首个公开版本。
 
 ## 许可与致谢
 
