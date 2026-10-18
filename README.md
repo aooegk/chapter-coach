@@ -393,22 +393,6 @@ python scripts/apply_result.py ... --reset
 - 没有常驻服务器；localhost 接收器是一次性的。
 - Word 导出依赖 Python，且仅在 A 档可用。
 
-后续可做：
-
-- 画布作图作答。
-- 更细的错因与知识点依赖图。
-- 自动复习计划与提醒。
-- 更多平台适配与截图/演示素材。
-
-## 开发与测试
-
-示例课程数据不随仓库发布（避免版权与隐私问题）。本地测试时可用自己的 PPT 复现；`docs/` 中的截图来自一次本地测试。
-
-本地目录（不提交）：
-
-- `examples/db-ch3/`：数据库课件测试。
-- `examples/math-demo/`：数学证明/计算与图片作答测试。
-
 ## 更新日志
 
 见 [CHANGELOG.md](CHANGELOG.md)。
